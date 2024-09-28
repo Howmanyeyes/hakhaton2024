@@ -19,24 +19,12 @@ SYSTEM {SYSTEM}
         await self.llama.create('synonyms', self.MODELFILE)
 
 
-    async def process(self, data: str):
-        res, json = await self.llama.generate(prompt=data, system=self.SYSTEM)
-        return json if res else None
-    
-    async def formatted_process(self, data: str | Iterable):
-        def strlistfmt(strs: Iterable):
-            for str in strs:
-                str = str.split('. ')[-1].strip()
-                if len(str): yield str
+    async def process(self, data: str | Iterable):
         if type(data) != str:
             data = '\n'.join(data)
-        response = await self.process(data)
-        if response is None:
-            return None
-        else:
-            response = response.get('response', '').split('\n')
-            
-            return list(strlistfmt(response))
+        res, json = await self.llama.generate(prompt=data, system=self.SYSTEM)
+        return json.get('response', '') if res else None
+
 
 async def main():
     syn = Synonyms('https://hack.agicotech.ru/api')
@@ -48,7 +36,7 @@ async def main():
             data.append(s)
         else:
             break
-    answer = await syn.formatted_process(data)
+    answer = await syn.process(data)
     print(answer)
 
 if __name__ == '__main__':
