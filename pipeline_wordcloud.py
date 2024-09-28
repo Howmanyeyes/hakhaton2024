@@ -19,4 +19,5 @@ async def pipeline_text(data: str | Iterable[str]):
        if data is None:
             data = ''
        data = response_formatter(data)
+       data = {s:i for i, s in enumerate(data[::-1])}
        return data

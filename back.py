@@ -10,15 +10,16 @@ try:
     import asyncio
     import httpx
     import matplotlib.pyplot as plt
-
     from wordcloud import WordCloud
     from fastapi.responses import StreamingResponse
+    from pipeline_wordcloud import pipeline_text
 except ModuleNotFoundError:
     import os, sys
     os.system(f'{sys.executable} -m pip install -r req.txt')
     exit(0)
 
 app = FastAPI()
+
 
 class Q:
     def __init__(self):
@@ -94,14 +95,19 @@ async def upload_file(what_look: str = Form(...), file: UploadFile = File(...)):
         return 0
     print(words)
         
-    async with httpx.AsyncClient() as client:
+    """async with httpx.AsyncClient() as client:
         words = await client.post('http://localhost:1337/sort/', json = {'words': words})
         
+    
 
     # words = words.json() надо тут чето сделать вместо евала
     words = eval(words._content)
+    
     weighted_words = [[x, y] for x, y in zip(words.keys(), words.values())]
     # print(weighted_words)
+    """
+    words = pipeline_text(words) # Возвращает {строка : вес}
+
     wc = WordCloud(background_color="white", max_words=1000)
     wc.generate_from_frequencies(words)
     plt.imshow(wc, interpolation="bilinear")
