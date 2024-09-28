@@ -15,7 +15,7 @@ app = FastAPI()
 @app.post("/sort/")
 async def sort(words: dict):
     words = {"suka": 1, "kal": 5, "ebal": 2}
-    time.sleep(3)
+    asyncio.sleep(3)
     return words
 
 

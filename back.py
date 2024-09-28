@@ -8,6 +8,8 @@ import pandas as pd
 import io
 import asyncio
 import httpx
+import matplotlib.pyplot as plt
+
 from wordcloud import WordCloud
 from fastapi.responses import StreamingResponse
 
@@ -40,7 +42,7 @@ async def read_root():
 def get_and_filter(df, what_look):
     
     l_words = list(df[what_look])
-    l_words = [x for x in l_words if type(x) == str and len(x) < 3]
+    l_words = [x for x in l_words if type(x) == str and len(x) < 3] #IIIIIIIIIIIIISSSSSSSPTRAVIT
     
     '''
     # filtration starts here
@@ -80,8 +82,11 @@ async def upload_file(what_look: str = Form(...), file: UploadFile = File(...)):
         await asyncio.sleep(0.01)
         print('thread is alive')
         get_and_filter_t.join()""" # threads try
-    
-    words = await a_get_and_filter(df, what_look)
+    try:
+        words = await a_get_and_filter(df, what_look)
+    except Exception as e:
+        print(e)
+        return 0
     print(words)
         
     async with httpx.AsyncClient() as client:
@@ -92,7 +97,6 @@ async def upload_file(what_look: str = Form(...), file: UploadFile = File(...)):
     words = eval(words._content)
     weighted_words = [[x, y] for x, y in zip(words.keys(), words.values())]
     # print(weighted_words)
-    import matplotlib.pyplot as plt
     wc = WordCloud(background_color="white", max_words=1000)
     wc.generate_from_frequencies(words)
     plt.imshow(wc, interpolation="bilinear")
