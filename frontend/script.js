@@ -1,0 +1,186 @@
+const uploadButton = document.getElementById('upload-button');
+const fileInput = document.getElementById('file-input');
+const loading = document.getElementById('loading');
+const dynamicInputs = document.getElementById('dynamic-inputs');
+const processButton = document.getElementById('process-button');
+const resultImage = document.getElementById('result-image');
+const downloadButton = document.getElementById('download-button');
+let targetId = '';
+let inputsData = {};
+
+// Upload Button Click
+uploadButton.addEventListener('click', () => {
+    fileInput.click();
+});
+
+// File Input Change
+fileInput.addEventListener('change', () => {
+    const file = fileInput.files[0];
+    if (file) {
+        uploadFile(file);
+    }
+});
+
+// Upload File Function
+function uploadFile(file) {
+    uploadButton.style.display = 'none';
+    loading.style.display = 'block';
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    fetch('/rest/upload', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        loading.style.display = 'none';
+        targetId = data.target_id;
+        inputsData = data.inputs;
+
+        if (Object.keys(inputsData).length === 0) {
+            // No inputs, proceed to processing
+            processInputs({});
+        } else {
+            // Generate Inputs
+            generateInputs(inputsData);
+            processButton.style.display = 'block';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        loading.style.display = 'none';
+        uploadButton.style.display = 'block';
+    });
+}
+
+// Generate Inputs Function
+function generateInputs(inputs) {
+    dynamicInputs.innerHTML = '';
+    for (const [id, input] of Object.entries(inputs)) {
+        const div = document.createElement('div');
+        div.className = 'input-field';
+
+        if (input.type === 'toggle') {
+            const label = document.createElement('label');
+            label.innerText = id + ': ';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = input.value || false;
+            checkbox.id = id;
+            label.appendChild(checkbox);
+            div.appendChild(label);
+        } else if (input.type === 'dropdown') {
+            const label = document.createElement('label');
+            label.innerText = id + ': ';
+            const select = document.createElement('select');
+            select.id = id;
+            input.items.forEach(item => {
+                const option = document.createElement('option');
+                option.value = item;
+                option.text = item;
+                select.appendChild(option);
+            });
+            div.appendChild(label);
+            div.appendChild(select);
+        } else if (input.type === 'checkbox') {
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.id = id;
+            checkbox.dataset.group = input.group || '';
+            const label = document.createElement('label');
+            label.className = 'inline-label';
+            label.htmlFor = id;
+            label.innerText = id;
+            div.appendChild(checkbox);
+            div.appendChild(label);
+        } else if (input.type === 'radio') {
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.id = id;
+            radio.name = input.group || id;
+            const label = document.createElement('label');
+            label.className = 'inline-label';
+            label.htmlFor = id;
+            label.innerText = id;
+            div.appendChild(radio);
+            div.appendChild(label);
+        } else if (input.type === 'text') {
+            const label = document.createElement('label');
+            label.innerText = id + ': ';
+            const textInput = document.createElement('input');
+            textInput.type = 'text';
+            textInput.id = id;
+            textInput.value = input.default || '';
+            div.appendChild(label);
+            div.appendChild(textInput);
+        }
+
+        dynamicInputs.appendChild(div);
+    }
+}
+
+// Process Button Click
+processButton.addEventListener('click', () => {
+    const inputsValues = {};
+    for (const [id, input] of Object.entries(inputsData)) {
+        const element = document.getElementById(id);
+        if (input.type === 'toggle' || input.type === 'checkbox') {
+            inputsValues[id] = element.checked;
+        } else if (input.type === 'dropdown') {
+            inputsValues[id] = element.value;
+        } else if (input.type === 'radio') {
+            inputsValues[id] = element.checked;
+        } else if (input.type === 'text') {
+            inputsValues[id] = element.value;
+        }
+    }
+    processInputs(inputsValues);
+});
+
+// Process Inputs Function
+function processInputs(inputsValues) {
+    dynamicInputs.style.display = 'none';
+    processButton.style.display = 'none';
+    loading.style.display = 'block';
+
+    const payload = {
+        inputs: inputsValues,
+        target_id: targetId
+    };
+
+    fetch('/rest/process', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(payload)
+    })
+    .then(response => response.json())
+    .then(data => {
+        loading.style.display = 'none';
+        displayResult(data.image_url);
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        loading.style.display = 'none';
+    });
+}
+
+// Display Result Function
+function displayResult(imageUrl) {
+    resultImage.src = imageUrl;
+    resultImage.style.display = 'block';
+    downloadButton.style.display = 'block';
+}
+
+// Download Button Click
+downloadButton.addEventListener('click', () => {
+    const link = document.createElement('a');
+    link.href = resultImage.src;
+    link.download = 'wordcloud.png';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+});

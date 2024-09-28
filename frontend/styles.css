@@ -1,0 +1,156 @@
+/* Global Styles */
+body, html {
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    color: #ffffff;
+    height: 100%;
+    /* Removed background-color to reveal video */
+}
+
+/* Centered Window */
+#center-window {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: #ffffff; /* Changed to white */
+    border-radius: 30px; /* Increased for more rounded corners */
+    padding: 20px;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-width: 70vmin; /* Increased size */
+    min-height: 70vmin; /* Increased size */
+    max-width: 80%;
+    max-height: 80%;
+    overflow: auto;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3); /* Increased shadow size */
+    justify-content: flex-start; /* Align items to the top */
+}
+
+
+
+/* Buttons */
+button {
+    padding: 20px 40px; /* Increased size */
+    font-size: 22px; /* Increased font size */
+    cursor: pointer;
+    background-color: #FF0032; /* Changed to #FF0032 */
+    color: #ffffff; /* Changed text color to white for contrast */
+    border: none;
+    border-radius: 10px;
+    margin: 20px 0;
+    transition: background-color 0.3s, color 0.3s;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); /* Added shadow to buttons */
+}
+
+/* Center the upload button within the rectangle */
+#upload-button {
+    margin-top: auto;
+    margin-bottom: auto;
+}
+
+/* Adjusted hover effect for buttons */
+button:hover {
+    background-color: #cc0028; /* Slightly darker red on hover */
+}
+
+/* Hidden File Input */
+#file-input {
+    display: none;
+}
+
+/* Loading Animation */
+.loader {
+    border: 8px solid #f3f3f3; /* Light grey */
+    border-top: 8px solid #ff0000; /* Red accent */
+    border-radius: 50%;
+    width: 60px;
+    height: 60px;
+    animation: spin 1s linear infinite;
+    margin: 20px 0;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Input Fields */
+.input-field {
+    margin: 10px 0;
+    width: 100%;
+    color: #ffffff;
+}
+
+.input-field label {
+    display: block;
+    margin-bottom: 5px;
+    color: #b4b4b4;
+}
+
+.input-field input[type="text"],
+.input-field select {
+    width: 100%;
+    padding: 10px;
+    background-color: #3a3a3a;
+    color: #ffffff;
+    border: 1px solid #b4b4b4;
+    border-radius: 5px;
+}
+
+.input-field input[type="checkbox"],
+.input-field input[type="radio"] {
+    margin-right: 5px;
+}
+
+.input-field label.inline-label {
+    display: inline;
+    margin-left: 5px;
+}
+
+/* Image Display */
+#result-image {
+    max-width: 100%;
+    max-height: 50vh;
+    margin-bottom: 20px;
+    border: 1px solid #b4b4b4;
+    border-radius: 5px;
+}
+
+/* Video Background */
+#video-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    width: 100vw;
+    height: 100vh;
+    transform: translate(-50%, -50%); /* Center the video container */
+    overflow: hidden;
+    z-index: -1;
+}
+
+#video-bg {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    min-width: 100vw;
+    min-height: 100vh;
+    width: auto;
+    height: auto;
+    transform: translate(-50%, -50%); /* Center the video */
+    z-index: -1;
+}
+
+/* Header Title */
+#header-title {
+    font-family: 'MTS Wide', sans-serif; /* Applied MTS Wide font */
+    color: #000000; /* Black text */
+    margin-bottom: 20px; /* Space below the header */
+    font-size: 36px;
+    align-self: center; /* Center the header horizontally */
+    margin-top: 0; /* Ensure no extra top margin */
+}

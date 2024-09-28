@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Word Cloud Service</title>
+    <!-- Added link to the MTS Wide font stylesheet -->
+    <link rel="stylesheet" href="fonts/mts/stylesheet.css">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+    <!-- Video Background -->
+    <div id="video-container">
+        <video autoplay muted loop id="video-bg">
+            <source src="background.webm" type="video/webm">
+            Your browser does not support HTML5 video.
+        </video>
+    </div>
+
+    <!-- Centered Window -->
+    <div id="center-window">
+        <!-- Added Header -->
+        <h1 id="header-title">AI Survey WordCloud</h1>
+
+        <!-- Upload Button -->
+        <button id="upload-button">Upload File</button>
+        <input type="file" id="file-input">
+
+        <!-- Loading Animation -->
+        <div id="loading" class="loader" style="display: none;"></div>
+
+        <!-- Dynamic Inputs -->
+        <div id="dynamic-inputs"></div>
+
+        <!-- Process Button -->
+        <button id="process-button" style="display: none;">Process</button>
+
+        <!-- Result Image -->
+        <img id="result-image" style="display: none;">
+
+        <!-- Download Button -->
+        <button id="download-button" style="display: none;">Download</button>
+    </div>
+
+    <!-- JavaScript -->
+    <script src="script.js"></script>
+</body>
+</html>
