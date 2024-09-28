@@ -332,15 +332,72 @@
             formData.append("what_look", simpleTextInput);
             formData.append("file", simpleFileInput.files[0]);
 
-            fetch("/simple_upload", {
+            fetch("/simple_upload/", {
                 method: "POST",
                 body: formData
-            }).then(response => response.json())
-            .then(data => {
-                document.getElementById("simpleStatus").innerText = `File "${data.file_name}" uploaded successfully!`;
+            }).then(response => response.blob())  // Expect the server to return a Blob (image)
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+
+                // Open the image in a new tab
+                window.open(url, '_blank');
+
+                // Trigger a download for the image
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'clowd_image.png';  // Set the download file name
+                document.body.appendChild(a);
+                a.click();  // Trigger the download
+                document.body.removeChild(a);  // Clean up the element
+
+                // Revoke the URL after download
+                window.URL.revokeObjectURL(url);
+
+                document.getElementById("simpleStatus").innerText = "Image successfully downloaded and opened!";
             })
             .catch(error => {
                 document.getElementById("simpleStatus").innerText = "Error: " + error;
+            });
+        }
+        function downloadAndOpenClowdImage() {
+            fetch("/get_clowd/")
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);  // Create a URL for the blob
+
+                // Open the image in a new tab
+                window.open(url, '_blank');
+
+                // Trigger a download for the image
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'clowd_image.png';  // Set the download file name
+                document.body.appendChild(a);
+                a.click();  // Trigger the download
+                document.body.removeChild(a);  // Clean up the element
+
+                // Revoke the URL after the download
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => {
+                document.getElementById("simpleStatus").innerText = "Error downloading the image: " + error;
+            });
+        }
+
+        function downloadClowdImage() {
+            fetch("/get_clowd/")
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(new Blob([blob]));
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'clowd_image.png';  // Set the download file name
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+            })
+            .catch(error => {
+                document.getElementById("simpleStatus").innerText = "Error downloading the image: " + error;
             });
         }
         // Tabs functionality
