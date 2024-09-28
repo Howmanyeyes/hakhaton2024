@@ -1,4 +1,5 @@
 
 /__pycache__
 /hakathon_venv
-*.txt
+.txt
+test_data.txt

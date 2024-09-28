@@ -1,6 +1,6 @@
 try:
     from fastapi import FastAPI, File, UploadFile, Form
-    from fastapi.responses import HTMLResponse
+    from fastapi.responses import HTMLResponse, JSONResponse
     from pathlib import Path
     # import shutil
     import threading
@@ -92,7 +92,7 @@ async def upload_file(what_look: str = Form(...), file: UploadFile = File(...)):
         words = await a_get_and_filter(df, what_look)
     except Exception as e:
         print(e)
-        return 0
+        return JSONResponse({'error': str(e)}, 500)
     print(words)
         
     """async with httpx.AsyncClient() as client:
