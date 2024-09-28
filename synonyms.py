@@ -1,9 +1,9 @@
 from llama import llama
-
+from typing import Iterable
 class Synonyms:
     def __init__(self, api_url):
         self.llama = llama(api_url, 'synonyms')
-    SYSTEM = """You are an advanced language model specialized in analyzing survey data. Your task is to process a list of textual survey responses, group them based on synonymous or similar meanings, and generate concise group names. Each group name should encapsulate the group's meaning in 1-3 words. Provide a maximum of 50 group names, sorted from the most to the least popular based on the number of responses in each group. The output should be two column in csv format: group names and index of group mass (how many rows are included in it). Ensure that the group names are clear, distinct, and accurately represent the underlying responses in their original language without being overly generic or ambiguous. Your response must contain only requested data and nothing else."""
+    SYSTEM = """Ты - продвинутая языковая модель и твоя задача - анализ результатов опросов. Тебе нужно сгруппировать полученные в виде столбца строк ответы по смыслу в группы с синонимичным значением. В ответ давай ТОЛЬКО названия групп, каждое - от 1 до 3 слов в отельной строке"""
     MODELFILE = f"""FROM llama3.2:3b
 PARAMETER temperature 0.5
 SYSTEM {SYSTEM}
@@ -21,7 +21,22 @@ SYSTEM {SYSTEM}
 
     async def process(self, data: str):
         res, json = await self.llama.generate(prompt=data, system=self.SYSTEM)
-        return res, json
+        return json if res else None
+    
+    async def formatted_process(self, data: str | Iterable):
+        def strlistfmt(strs: Iterable):
+            for str in strs:
+                str = str.split('. ')[-1].strip()
+                if len(str): yield str
+        if type(data) != str:
+            data = '\n'.join(data)
+        response = await self.process(data)
+        if response is None:
+            return None
+        else:
+            response = response.get('response', '').split('\n')
+            
+            return list(strlistfmt(response))
 
 async def main():
     syn = Synonyms('https://hack.agicotech.ru/api')
@@ -33,8 +48,8 @@ async def main():
             data.append(s)
         else:
             break
-    res, answer = await syn.process('\n'.join(data))
-    print(answer.get('response', answer))
+    answer = await syn.formatted_process(data)
+    print(answer)
 
 if __name__ == '__main__':
     import asyncio

@@ -1,17 +1,22 @@
-from fastapi import FastAPI, File, UploadFile, Form
-from fastapi.responses import HTMLResponse
-from pathlib import Path
-# import shutil
-import threading
-import uvicorn
-import pandas as pd
-import io
-import asyncio
-import httpx
-import matplotlib.pyplot as plt
+try:
+    from fastapi import FastAPI, File, UploadFile, Form
+    from fastapi.responses import HTMLResponse
+    from pathlib import Path
+    # import shutil
+    import threading
+    import uvicorn
+    import pandas as pd
+    import io
+    import asyncio
+    import httpx
+    import matplotlib.pyplot as plt
 
-from wordcloud import WordCloud
-from fastapi.responses import StreamingResponse
+    from wordcloud import WordCloud
+    from fastapi.responses import StreamingResponse
+except ModuleNotFoundError:
+    import os, sys
+    os.system(f'{sys.executable} -m pip install -r req.txt')
+    exit(0)
 
 app = FastAPI()
 
