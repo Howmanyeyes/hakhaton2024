@@ -20,6 +20,35 @@ async def read_root():
     else:
         return HTMLResponse(content="<h1>Error: front.html not found!</h1>", status_code=404)
 
+@app.post("/simple_upload/")
+async def upload_file(what_look: str = Form(...), file: UploadFile = File(...)):
+    #print(file)
+    bad_words = ['fuck', 'shit', 'bitch']
+    contents = await file.read()
+    f_format = file.filename.split(".")[-1]
+    if f_format == 'csv':
+        df = pd.read_csv(io.StringIO(contents.decode()))
+    if f_format == 'xlsx':
+        df = pd.read_excel(io.BytesIO(contents))
+
+    if what_look not in df.haed():
+        return 0
+    l_words = list(df[what_look])
+    l_words = [x for x in l_words if type(x) == str and len(x) > 3]
+    
+    '''
+    # filtration starts here
+    words = ' \n '.join(l_words)
+    words = words.split(' ')
+    words = [x for x in words if x.lower() not in bad_words]
+    words = ' '.join(words)
+    # filtered
+    '''
+    
+    words = '\n'.join(l_words)
+    
+    
+
 @app.post("/uploadfile/")
 async def upload_file(file: UploadFile = File(...), file_type: str = Form(...), where_look: str = Form(...), what_look: str = Form(...)):
     # Read the file contents
@@ -29,7 +58,14 @@ async def upload_file(file: UploadFile = File(...), file_type: str = Form(...), 
         df = pd.read_csv(io.StringIO(contents.decode()))
     if f_format == 'xlsx':
         df = pd.read_excel(io.BytesIO(contents))
-        
+    
+    if (where_look == 'col' or where_look == 'idk') and what_look in df.haed():
+        pass
+    elif where_look == 'row' and what_look == int:
+        pass
+    else:
+        return 0
+
 
     print(df)
     
