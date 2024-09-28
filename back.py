@@ -60,7 +60,7 @@ def get_and_filter(df, what_look):
     # filtered
     '''
     import time
-    time.sleep(10)
+    time.sleep(5)
 
     words = '\n'.join(l_words) #this line needed only when no filtering
     return words
@@ -68,6 +68,18 @@ def get_and_filter(df, what_look):
 async def a_get_and_filter(df, what_look):
     words = await asyncio.to_thread(get_and_filter, df, what_look)
     return words
+
+def make_cloud(words):
+    # weighted_words = [[x, y] for x, y in zip(words.keys(), words.values())]
+    # print(weighted_words)
+    wc = WordCloud(background_color="white", max_words=1000)
+    wc.generate_from_frequencies(words)
+    return wc
+
+
+async def a_make_cloud(words):
+    wc = await asyncio.to_thread(make_cloud, words)
+    return wc
 
 @app.post("/simple_upload/")
 async def upload_file(what_look: str = Form(...), file: UploadFile = File(...)):
@@ -97,9 +109,26 @@ async def upload_file(what_look: str = Form(...), file: UploadFile = File(...)):
         
     """async with httpx.AsyncClient() as client:
         words = await client.post('http://localhost:1337/sort/', json = {'words': words})
+<<<<<<< Updated upstream
         
     
+=======
+    
+    resp_words = eval(words._content)
+    
+    # words = resp_words.deepcopy()
+    wc = await a_make_cloud(resp_words)
+    plt.imshow(wc, interpolation="bilinear")
+    plt.axis("off")
+    # plt.savefig('foo.png')
+>>>>>>> Stashed changes
 
+
+    buf = io.BytesIO()
+    plt.savefig(buf, format='png')
+    buf.seek(0)
+    return StreamingResponse(buf, media_type="image/png")
+    """
     # words = words.json() надо тут чето сделать вместо евала
     words = eval(words._content)
     
@@ -119,7 +148,8 @@ async def upload_file(what_look: str = Form(...), file: UploadFile = File(...)):
     plt.savefig(buf, format='png')
     buf.seek(0)
     return StreamingResponse(buf, media_type="image/png")
-    return que_num
+    
+    """
 
 # @app.get("/get_clowd/")
 # async def get_clowd():

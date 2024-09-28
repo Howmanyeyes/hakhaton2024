@@ -332,7 +332,7 @@
             formData.append("what_look", simpleTextInput);
             formData.append("file", simpleFileInput.files[0]);
 
-            fetch("http://localhost:8000/simple_upload/", {
+            fetch("/simple_upload/", {
                 method: "POST",
                 body: formData
             }).then(response => response.blob())  // Expect the server to return a Blob (image)
