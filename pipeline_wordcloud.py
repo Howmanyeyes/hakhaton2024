@@ -37,7 +37,7 @@ async def pipeline_array_words(data: Iterable[str]):
 
 async def pipeline_text(data: str | Iterable[str]):
     if type(data) == str: data = data.split('\n')
-    data = pipeline_array_words(data)
+    data = await pipeline_array_words(data)
     while len(data) > 60:
-        data = pipeline_array_words(data)
+        data = await pipeline_array_words(data)
     return {s : i for i, s in enumerate(data[::-1])}
