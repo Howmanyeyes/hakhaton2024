@@ -57,6 +57,7 @@ def get_and_filter(df, what_look):
     words = words.split(' ')
     words = [x for x in words if x.lower() not in bad_words]
     words = ' '.join(words)
+    words.replace(' \n ', '\n')
     # filtered
     '''
     import time
