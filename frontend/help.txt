@@ -1,0 +1,1 @@
+Load survey data as column of phrases sepatated by newline or a table in svg or xlsx format and a column of answers, than click process to get your structured word cloud

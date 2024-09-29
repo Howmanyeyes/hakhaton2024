@@ -184,3 +184,43 @@ downloadButton.addEventListener('click', () => {
     link.click();
     document.body.removeChild(link);
 });
+
+
+
+const helpButton = document.getElementById('help-button');
+
+helpButton.addEventListener('click', () => {
+    // Create help window
+    const helpWindow = document.createElement('div');
+    helpWindow.id = 'help-window';
+    helpWindow.className = 'help-window';
+    document.body.appendChild(helpWindow);
+    
+    // Add close button
+    const closeButton = document.createElement('button');
+    closeButton.id = 'close-help-button';
+    closeButton.innerText = 'Close';
+    closeButton.className = 'close-help-button';
+    helpWindow.appendChild(closeButton);
+    
+    // Add content area
+    const helpContent = document.createElement('div');
+    helpContent.id = 'help-content';
+    helpContent.className = 'help-content';
+    helpWindow.appendChild(helpContent);
+    
+    fetch('/help.txt')
+        .then(response => response.text())
+        .then(text => {
+            helpContent.innerText = text;
+        })
+        .catch(error => {
+            helpContent.innerText = 'Failed to load help content.';
+            console.error('Error loading help content:', error);
+        });
+    
+    // Close button event
+    closeButton.addEventListener('click', () => {
+        document.body.removeChild(helpWindow);
+    });
+});

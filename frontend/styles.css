@@ -6,56 +6,125 @@ body, html {
     font-family: Arial, sans-serif;
     color: #ffffff;
     height: 100%;
-    /* Removed background-color to reveal video */
+}
+
+body {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
 }
 
 /* Centered Window */
 #center-window {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: #ffffff; /* Changed to white */
-    border-radius: 30px; /* Increased for more rounded corners */
+    position: relative; /* Changed from absolute to relative */
+    background-color: #ffffff;
+    border-radius: 30px;
     padding: 20px;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     align-items: center;
-    min-width: 70vmin; /* Increased size */
-    min-height: 70vmin; /* Increased size */
+    min-width: 75vmin;
+    min-height: 75vmin;
     max-width: 80%;
-    max-height: 80%;
+    max-height: 90%;
     overflow: auto;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3); /* Increased shadow size */
-    justify-content: flex-start; /* Align items to the top */
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    justify-content: flex-start;
 }
-
-
-
 /* Buttons */
 button {
-    padding: 20px 40px; /* Increased size */
-    font-size: 22px; /* Increased font size */
+    padding: 1em 2em;
+    font-size: 4vmin;
+    font-family: 'MTS Wide', sans-serif;
     cursor: pointer;
-    background-color: #FF0032; /* Changed to #FF0032 */
-    color: #ffffff; /* Changed text color to white for contrast */
+    background-color: #FF0032;
+    color: #ffffff;
     border: none;
     border-radius: 10px;
     margin: 20px 0;
     transition: background-color 0.3s, color 0.3s;
-    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2); /* Added shadow to buttons */
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
 
-/* Center the upload button within the rectangle */
 #upload-button {
     margin-top: auto;
     margin-bottom: auto;
 }
-
 /* Adjusted hover effect for buttons */
 button:hover {
     background-color: #cc0028; /* Slightly darker red on hover */
+}
+
+
+/* Help Button */
+#help-button {
+    position: absolute;
+    bottom: 1%;
+    right: 1%;
+    background: none;
+    border: none;
+    cursor: pointer;
+    height: 10vmin;
+    width: 10vmin;
+    box-shadow: none;
+    padding: 2vmin;
+    margin: 0;
+}
+
+#help-button img {
+    width: 6vmin;
+    height: 6vmin;
+    /* padding: 0.7vmin; */
+    box-sizing: border-box;
+}
+
+/* Help Window */
+#help-window {
+    position: fixed;
+    top: 15%;
+    left: 15%;
+    width: 70%;
+    height: 70%;
+    background-color: #ffffff;
+    border-radius: 30px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    padding: 20px;
+    box-sizing: border-box;
+    overflow: auto;
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+}
+
+
+/* Center the upload button within the rectangle */
+
+
+.close-help-button {
+    align-self: flex-end;
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+    background-color: #FF0032;
+    color: #ffffff;
+    border: none;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+}
+
+.close-help-button:hover {
+    background-color: #cc0028;
+}
+
+.help-content {
+    flex-grow: 1;
+    overflow: auto;
+    color: #000000;
+    font-size: 16px;
+    line-height: 1.5;
 }
 
 /* Hidden File Input */
@@ -89,7 +158,8 @@ button:hover {
 .input-field label {
     display: block;
     margin-bottom: 5px;
-    color: #b4b4b4;
+    color: black;
+    font-family: 'MTS Wide';
 }
 
 .input-field input[type="text"],
@@ -147,10 +217,11 @@ button:hover {
 
 /* Header Title */
 #header-title {
-    font-family: 'MTS Wide', sans-serif; /* Applied MTS Wide font */
-    color: #000000; /* Black text */
-    margin-bottom: 20px; /* Space below the header */
-    font-size: 36px;
-    align-self: center; /* Center the header horizontally */
-    margin-top: 0; /* Ensure no extra top margin */
+    font-family: 'MTS Wide', sans-serif;
+    color: #000000;
+    /* margin-bottom: 0.5em; */
+    font-size: 5vmin;
+    align-self: center;
+    margin-top: 0;
 }
+

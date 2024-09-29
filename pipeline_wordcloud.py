@@ -8,8 +8,8 @@ MAX_OUT = 60
 
 def strlistfmt(strs: Iterable):
             for str in strs:
-                str = str.split('. ')[-1].strip()
-                if len(str): yield str
+                str = ''.join(s for s in str.strip() if s.isalpha() or s == ' ')
+                if len(str) and not ':' in str: yield str
 
 def response_formatter(response):
     response = response.split('\n')
@@ -28,16 +28,24 @@ async def tree_iteration(data : list):
         data_array += batch_res
     return data_array
 
-async def pipeline_array_words(data: Iterable[str]):
+async def pipeline_array_words(data: Iterable[str] | str):
     data = await model.process(data)
     if data is None:
         data = ''
     data = response_formatter(data)
     return data
 
+def remove_multiple_spaces(s: str):
+    s = ' '.join(subs for subs in s.split(' ') if len(subs))
+    return s
+
+def remove_empty_lines_and_spaces(text: Iterable[str]):
+    yield from (remove_multiple_spaces(s) for s in text if len(s))
+
 async def pipeline_text(data: str | Iterable[str]):
     if type(data) == str: data = data.split('\n')
-    data = await pipeline_array_words(data)
-    while len(data) > 60:
-        data = await pipeline_array_words(data)
+    data = list(remove_empty_lines_and_spaces(data))
+    data = await tree_iteration(data)
+    while len(data) > MAX_OUT:
+        data = await tree_iteration(data)
     return {s : i for i, s in enumerate(data[::-1], 1)}

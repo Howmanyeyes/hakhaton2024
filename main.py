@@ -100,7 +100,7 @@ def create_wordcloud(rating, colour, name):
     if colour == "MTC Special":
         colour = 'viridis'
         MTC = True
-    wordcloud = WordCloud(width=1000, height=1000, background_color="white", colormap=colour, random_state=42).generate_from_frequencies(rating)
+    wordcloud = WordCloud(width=1000, height=1000, background_color="white", colormap=colour, random_state=42, font_path='MTSWide-Bold.ttf').generate_from_frequencies(rating)
     if MTC:
         wordcloud.recolor(color_func=red_color_func)
     # Display the generated word cloud
