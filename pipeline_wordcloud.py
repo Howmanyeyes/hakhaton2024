@@ -24,7 +24,7 @@ async def tree_iteration(data : list):
     data_array = []
     for i in range(0, len(data), batch_size):
         batch = data[i:i+batch_size]
-        batch_res = pipeline_array_words(batch)
+        batch_res = await pipeline_array_words(batch)
         data_array += batch_res
     return data_array
 
