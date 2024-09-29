@@ -50,7 +50,7 @@ def get_upload(file):
     elif f_type == 'xlsx':
         df = pd.read_excel(f_content)
     else: # по умолчанию всё txt
-        with open(f'{f_name}.txt', 'wb') as f:
+        with open(f'temp_tables/{f_name}.txt', 'wb') as f:
             f.write(f_content.getvalue())
         return {
             "inputs": {
@@ -59,7 +59,7 @@ def get_upload(file):
             },
             "target_id": f"{f_name}.txt",
         }
-    df.to_excel(f"{f_name}.xlsx", index=False, engine='openpyxl')
+    df.to_pickle(f"temp_tables/{f_name}.pkl")
     
     cols = [f'{ind_exel(int(num))}{x}' for num, x in enumerate(["My info is in row"] + list(df.columns), 0)]
     # rows = len(df) не нужно пока что 
@@ -71,7 +71,7 @@ def get_upload(file):
             "type number of row (ONLY if you use rows)": {"type": "text", "default": ""},
             "filter profanity": {"type": "checkbox", "default": True}
         },
-        "target_id": f"{f_name}.xlsx"
+        "target_id": f"{f_name}.pkl"
     }
 
 async def a_get_upload(file):
@@ -114,12 +114,13 @@ def create_wordcloud(rating, colour, name):
     plt.close()
 
 def get_answers(request: dict): 
-    if request['target_id'].endswith('.txt'):
-        answers = open(request['target_id'], 'r', encoding = 'utf8').read()
-        # пайплайн чето тут ретюрн уже с картинкой
+    f_name = request['target_id']
+    if f_name.endswith('.txt'):
+        answers = open(f"temp_tables/{f_name}", 'r', encoding = 'utf8').read()
+        os.remove(f"temp_tables/{f_name}")
         return answers
     inputs = request['inputs']
-    df = pd.read_excel(request['target_id'])
+    df = pd.read_pickle(f"temp_tables/{f_name}")
    
     if inputs['choose column'] == 'My info is in row':
         if inputs['type number of row (ONLY if you use rows)'] != '':
@@ -134,15 +135,18 @@ def get_answers(request: dict):
 
     else:
         answers = [x for x in answers if type(x) == str]
+    os.remove(f"temp_tables/{f_name}")
     return answers
 
+async def a_get_answers(request: dict):
+    return await asyncio.to_thread(get_answers, request)
 
 @app.post('/rest/process/')
 async def return_image(request: dict):
-    answers = get_answers(request=request)
+    answers = await a_get_answers(request=request)
     # ретюрнить ансеры в пайплайн
     rating = await pipeline_text(answers) # заглушка, с тобой делать надо, дебагер выдает ошибку:     while len(data) > 60: TypeError: object of type 'coroutine' has no len()
-    os.remove(f"{request['target_id']}")
+    
 
     colour = request['inputs']['choose color scheme of clowd']
     create_wordcloud(rating, colour, request['target_id'])
