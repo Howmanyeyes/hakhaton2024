@@ -122,21 +122,21 @@ async def return_image(request: dict):
     inputs = request['inputs']
     df = pd.read_excel(request['target_id'])
    
-    if inputs['choose column'] == 'My info is in row' and \
-        inputs['type number of row (ONLY if you use rows)'] != '':
-        answers = df.iloc[int(inputs['type number of row (ONLY if you use rows)'])]
-    elif inputs['choose column'] == 'My info is in row' and \
-        inputs['type number of row (ONLY if you use rows)'] == '':
-        return 0 # return error - polzovatel dolbaeb
+    if inputs['choose column'] == 'My info is in row':
+        if inputs['type number of row (ONLY if you use rows)'] != '':
+            answers = df.iloc[int(inputs['type number of row (ONLY if you use rows)'])]
+        else:
+            return 0 # return error - polzovatel dolbaeb
     else:
         answers = df[inputs['choose column'].split(': ')[1]]
 
     if inputs['filter profanity']:
         answers = filter_profanity(answers)
+
     else:
         answers = [x for x in answers if type(x) == str]
     # ретюрнить ансеры в пайплайн
-    rating = {'suka': 1, 'kaaaaaaal':2,'pizda':3, 'ebnis':15} # await pipeline_text(answers) заглушка, с тобой делать надо, дебагер выдает ошибку:     while len(data) > 60: TypeError: object of type 'coroutine' has no len()
+    rating = await pipeline_text(answers) # заглушка, с тобой делать надо, дебагер выдает ошибку:     while len(data) > 60: TypeError: object of type 'coroutine' has no len()
     os.remove(f"{request['target_id']}")
 
     colour = request['inputs']['choose color scheme of clowd']
