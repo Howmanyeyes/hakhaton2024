@@ -40,4 +40,4 @@ async def pipeline_text(data: str | Iterable[str]):
     data = await pipeline_array_words(data)
     while len(data) > 60:
         data = await pipeline_array_words(data)
-    return {s : i for i, s in enumerate(data[::-1])}
+    return {s : i for i, s in enumerate(data[::-1], 1)}
