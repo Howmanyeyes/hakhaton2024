@@ -1,6 +1,6 @@
 try:
     from fastapi import FastAPI, File, UploadFile, Form
-    from fastapi.responses import HTMLResponse, JSONResponse, FileResponse, Response
+    from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
     from pathlib import Path
     # import shutil
     import threading
@@ -31,7 +31,7 @@ def generate_name():
 
 
 @app.post('/rest/upload')
-def return_upload(file: UploadFile):
+def return_upload(file: UploadFile = File(...)):
     f_content = file.file._file
     f_type = file.filename.split(".")[-1]
     f_name = generate_name()
@@ -64,8 +64,8 @@ def return_upload(file: UploadFile):
     }
 
 @app.post('/rest/process/')
-def return_image(data: Response):
-    print(data.body)
+def return_image(data: JSONResponse):
+    print(data)
     print(1)
     return {
         "image_url": "/generated/test.jpg"
