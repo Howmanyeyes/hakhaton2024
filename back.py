@@ -1,197 +1,163 @@
 try:
     from fastapi import FastAPI, File, UploadFile, Form
-    from fastapi.responses import HTMLResponse, JSONResponse
+    from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
     from pathlib import Path
     # import shutil
     import threading
     import uvicorn
     import pandas as pd
     import io
+    import os
     import asyncio
-    import httpx
+    import json
+    import random
+    import string
     import matplotlib.pyplot as plt
     from wordcloud import WordCloud
     from fastapi.responses import StreamingResponse
     from pipeline_wordcloud import pipeline_text
+    from fastapi.staticfiles import StaticFiles
+
 except ModuleNotFoundError:
     import os, sys
     os.system(f'{sys.executable} -m pip install -r req.txt')
     exit(0)
 
-app = FastAPI()
+app = FastAPI(root_path='')
 
+app.mount("/generated", StaticFiles(directory="generated"), name="generated")
 
-class Q:
-    def __init__(self):
-        self.que = []
-        self.lenght = 0
+def generate_name():
+    return ''.join(random.choices(string.ascii_lowercase, k=8))
+
+def ind_exel(n):
+    result = ''
+    if n == 0:
+        return ''
+    while n > 0:
+        n -= 1  # Adjust for 0-indexed logic (Excel is 1-indexed)
+        result = chr(n % 26 + 65) + result  # Convert to A-Z (65 is ASCII 'A')
+        n //= 26
+    return result+': '
+
+def get_upload(file):
+    f_content = file.file._file
+    f_type = file.filename.split(".")[-1]
+    f_name = generate_name()
+    best_colormaps = ['MTC Special','viridis', 'plasma', 'inferno', 'magma', 'cividis', 'Spectral', 'coolwarm', 'YlGnBu', 'RdYlBu', 'PuBuGn', 'hsv']
+    if f_type == 'csv':
+        df = pd.read_csv(f_content)
+    elif f_type == 'xlsx':
+        df = pd.read_excel(f_content)
+    else: # по умолчанию всё txt
+        with open(f'temp_tables/{f_name}.txt', 'wb') as f:
+            f.write(f_content.getvalue())
+        return {
+            "inputs": {
+                "choose color scheme of clowd": {"type": "dropdown", "items": best_colormaps, "default": "red"},
+                "filter profanity": {"type": "checkbox", "default": True}
+            },
+            "target_id": f"{f_name}.txt",
+        }
+    df.to_pickle(f"temp_tables/{f_name}.pkl")
     
-    def avaliability_c(self):
-        if self.lenght == 0:
-            return True
+    cols = [f'{ind_exel(int(num))}{x}' for num, x in enumerate(["My info is in row"] + list(df.columns), 0)]
+    # rows = len(df) не нужно пока что 
+        
+    return {
+        "inputs": {
+            "choose color scheme of clowd": {"type": "dropdown", "items": best_colormaps, "default": "red"},
+            "choose column": {"type": "dropdown", "items": cols},
+            "type number of row (ONLY if you use rows)": {"type": "text", "default": ""},
+            "filter profanity": {"type": "checkbox", "default": True}
+        },
+        "target_id": f"{f_name}.pkl"
+    }
+
+async def a_get_upload(file):
+    return await asyncio.to_thread(get_upload, file)
+
+@app.post('/rest/upload')
+async def return_upload(file: UploadFile = File(...)):
+    return await a_get_upload(file)
+
+with open('bad_words.json', 'r') as f:
+    BAD_WORDS = set(json.load(f)) # set кратно ускоряет проверку на вхождение относительно list
+
+def filter_profanity(answers):
+    l_words = [x for x in answers if type(x) == str] # and len(x) < 3]
+    words = [x for x in l_words if x.lower() not in BAD_WORDS]
+    return words
+def red_color_func(word, font_size, position, orientation, random_state=None, **kwargs):
+        red_value = 255  # Maximum red value to keep it bright
+        green_value = random.randint(0, 50)  # Small random value for green (to keep red dominant)
+        blue_value = random.randint(0, 50)  # Small random value for blue (to keep red bright)
+        return f"rgb({red_value}, {green_value}, {blue_value})"
+
+def create_wordcloud(rating, colour, name):
+    # Create a WordCloud object with the specified color
+    MTC = False
+    if colour == "MTC Special":
+        colour = 'viridis'
+        MTC = True
+    wordcloud = WordCloud(width=1000, height=1000, background_color="white", colormap=colour, random_state=42).generate_from_frequencies(rating)
+    if MTC:
+        wordcloud.recolor(color_func=red_color_func)
+    # Display the generated word cloud
+    plt.figure(figsize=(10, 10))
+    plt.imshow(wordcloud, interpolation='bilinear')
+    plt.axis("off")  # No axis for cleaner look
+
+    # Save the word cloud as a PNG file with the given name
+    file_name = f"{name}.png"
+    plt.savefig(f"generated/{file_name}", format="png", bbox_inches="tight")
+    plt.close()
+
+def get_answers(request: dict): 
+    f_name = request['target_id']
+    if f_name.endswith('.txt'):
+        answers = open(f"temp_tables/{f_name}", 'r', encoding = 'utf8').read()
+        os.remove(f"temp_tables/{f_name}")
+        return answers
+    inputs = request['inputs']
+    df = pd.read_pickle(f"temp_tables/{f_name}")
+   
+    if inputs['choose column'] == 'My info is in row':
+        if inputs['type number of row (ONLY if you use rows)'] != '':
+            answers = df.iloc[int(inputs['type number of row (ONLY if you use rows)'])]
         else:
-            return False
-
-# Path to the HTML file
-html_file_path = Path(__file__).parent / "frontend/index.html"
-
-@app.get("/", response_class=HTMLResponse)
-async def read_root():
-    # Read the content of the HTML file
-    if html_file_path.exists():
-        html_content = html_file_path.read_text(encoding='utf-8')
-        return HTMLResponse(content=html_content)
+            return 0 # return error - polzovatel dolbaeb
     else:
-        return HTMLResponse(content="<h1>Error: front.html not found!</h1>", status_code=404)
+        answers = df[inputs['choose column'].split(': ')[1]]
 
+    if inputs['filter profanity']:
+        answers = filter_profanity(answers)
 
-def get_and_filter(df, what_look):
-    
-    l_words = list(df[what_look])
-    l_words = [x for x in l_words if type(x) == str and len(x) < 3] #IIIIIIIIIIIIISSSSSSSPTRAVIT
-    
-    '''
-    # filtration starts here
-    bad_words = ['fuck', 'shit', 'bitch']
-    words = ' \n '.join(l_words)
-    words = words.split(' ')
-    words = [x for x in words if x.lower() not in bad_words]
-    words = ' '.join(words)
-    words.replace(' \n ', '\n')
-    # filtered
-    '''
-    import time
-    time.sleep(5)
-
-    words = '\n'.join(l_words) #this line needed only when no filtering
-    return words
-
-async def a_get_and_filter(df, what_look):
-    words = await asyncio.to_thread(get_and_filter, df, what_look)
-    return words
-
-def make_cloud(words):
-    # weighted_words = [[x, y] for x, y in zip(words.keys(), words.values())]
-    # print(weighted_words)
-    wc = WordCloud(background_color="white", max_words=1000)
-    wc.generate_from_frequencies(words)
-    return wc
-
-
-async def a_make_cloud(words):
-    wc = await asyncio.to_thread(make_cloud, words)
-    return wc
-
-@app.post("/simple_upload/")
-async def upload_file(what_look: str = Form(...), file: UploadFile = File(...)):
-    
-    contents = await file.read()
-    f_format = file.filename.split(".")[-1]
-    if f_format == 'csv':
-        df = pd.read_csv(io.StringIO(contents.decode()))
-    elif f_format == 'xlsx':
-        df = pd.read_excel(io.BytesIO(contents))
-
-    if what_look not in df.head():
-        return 0
-    
-    """get_and_filter_t = threading.Thread(target=get_and_filter, args=(df, what_look))
-    words = get_and_filter_t.start()
-    while get_and_filter_t.is_alive():
-        await asyncio.sleep(0.01)
-        print('thread is alive')
-        get_and_filter_t.join()""" # threads try
-    try:
-        words = await a_get_and_filter(df, what_look)
-    except Exception as e:
-        print(e)
-        return JSONResponse({'error': str(e)}, 500)
-    print(words)
-        
-    """async with httpx.AsyncClient() as client:
-        words = await client.post('http://localhost:1337/sort/', json = {'words': words})
-<<<<<<< Updated upstream
-        
-    
-=======
-    
-    resp_words = eval(words._content)
-    
-    # words = resp_words.deepcopy()
-    wc = await a_make_cloud(resp_words)
-    plt.imshow(wc, interpolation="bilinear")
-    plt.axis("off")
-    # plt.savefig('foo.png')
->>>>>>> Stashed changes
-
-
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png')
-    buf.seek(0)
-    return StreamingResponse(buf, media_type="image/png")
-    """
-    # words = words.json() надо тут чето сделать вместо евала
-    words = eval(words._content)
-    
-    weighted_words = [[x, y] for x, y in zip(words.keys(), words.values())]
-    # print(weighted_words)
-    """
-    words = pipeline_text(words) # Возвращает {строка : вес}
-
-    wc = WordCloud(background_color="white", max_words=1000)
-    wc.generate_from_frequencies(words)
-    plt.imshow(wc, interpolation="bilinear")
-    plt.axis("off")
-    # plt.savefig('foo.png')
-
-
-    buf = io.BytesIO()
-    plt.savefig(buf, format='png')
-    buf.seek(0)
-    return StreamingResponse(buf, media_type="image/png")
-    
-    """
-
-# @app.get("/get_clowd/")
-# async def get_clowd():
-
-    
-    # plt.show() for debug, just to see picture
-    
-        
-
-@app.post("/uploadfile/")
-async def upload_file(file: UploadFile = File(...), file_type: str = Form(...), where_look: str = Form(...), what_look: str = Form(...)):
-    # Read the file contents
-    contents = await file.read()
-    f_format = file.filename.split(".")[-1]
-    if f_format == 'csv':
-        df = pd.read_csv(io.StringIO(contents.decode()))
-        
-    if f_format == 'xlsx':
-        df = pd.read_excel(io.BytesIO(contents))
-        cols = list(df.columns)
-    if (where_look == 'col' or where_look == 'idk') and what_look in df.haed():
-        pass
-    elif where_look == 'row' and what_look == int:
-        pass
     else:
-        return 0
+        answers = [x for x in answers if type(x) == str]
+    os.remove(f"temp_tables/{f_name}")
+    return answers
 
+async def a_get_answers(request: dict):
+    return await asyncio.to_thread(get_answers, request)
 
-    print(df)
+@app.post('/rest/process/')
+async def return_image(request: dict):
+    answers = await a_get_answers(request=request)
+    # ретюрнить ансеры в пайплайн
+    rating = await pipeline_text(answers) # заглушка, с тобой делать надо, дебагер выдает ошибку:     while len(data) > 60: TypeError: object of type 'coroutine' has no len()
     
-    # Return the file contents in the response as a string (for text files)
-    # return {"file_name": file.filename, "content": contents.decode("utf-8")}  # Decode as utf-8 for text files
+
+    colour = request['inputs']['choose color scheme of clowd']
+    create_wordcloud(rating, colour, request['target_id'])
+    return {
+        "image_url": f"/generated/{request['target_id']}.png"
+    }
+    
+
+app.mount("/", StaticFiles(directory="frontend",html = True), name="static")
 
 
-
-
-# To run the server, use this command:
-# uvicorn main:app --reload
-
-
-if __name__ == "__main__":
-    QUE = Q()
-    QUE.que.append('kal\ngovno\nshit')
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+if __name__ =='__main__':
+    import uvicorn
+    uvicorn.run(app, port=80)
