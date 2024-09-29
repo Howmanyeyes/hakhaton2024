@@ -150,7 +150,7 @@ function processInputs(inputsValues) {
         target_id: targetId
     };
 
-    fetch('/rest/process', {
+    fetch('/rest/process/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

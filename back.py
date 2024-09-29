@@ -33,7 +33,7 @@ class Q:
             return False
 
 # Path to the HTML file
-html_file_path = Path(__file__).parent / "front.html"
+html_file_path = Path(__file__).parent / "frontend/index.html"
 
 @app.get("/", response_class=HTMLResponse)
 async def read_root():
@@ -166,9 +166,10 @@ async def upload_file(file: UploadFile = File(...), file_type: str = Form(...), 
     f_format = file.filename.split(".")[-1]
     if f_format == 'csv':
         df = pd.read_csv(io.StringIO(contents.decode()))
+        
     if f_format == 'xlsx':
         df = pd.read_excel(io.BytesIO(contents))
-    
+        cols = list(df.columns)
     if (where_look == 'col' or where_look == 'idk') and what_look in df.haed():
         pass
     elif where_look == 'row' and what_look == int:
