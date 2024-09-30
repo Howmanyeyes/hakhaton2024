@@ -82,7 +82,7 @@ with open('bad_words.json', 'r') as f:
     BAD_WORDS = set(json.load(f)) # set кратно ускоряет проверку на вхождение относительно list
 
 def filter_profanity(answers):
-    l_words = [x for x in answers if type(x) == str] # and len(x) < 3]
+    l_words = [x for x in answers if type(x) == str]
     words = [x for x in l_words if x.lower() not in BAD_WORDS]
     return words
 
@@ -128,10 +128,11 @@ def get_answers(request: dict):
 
     if inputs['filter profanity']:
         answers = filter_profanity(answers)
-
     else:
         answers = [x for x in answers if type(x) == str]
     os.remove(f"temp_tables/{f_name}")
+    if len(answers) == 0:
+        return ['Некорректные данные', 'Некорректные данные', 'Некорректные данные']
     return answers
 
 async def a_get_answers(request: dict):
