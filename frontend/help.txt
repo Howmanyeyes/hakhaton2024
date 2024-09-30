@@ -1,1 +1,6 @@
-Load survey data as column of phrases sepatated by newline or a table in svg or xlsx format and a column of answers, than click process to get your structured word cloud
+1. Откройте - Shue-cloud (https://hack.agicotech.ru/) в браузере.
+2. Загрузите файл .xlsx, .csv, или .txt.
+3. Выберите стиль оформления облака слов.
+4. Выберите строку или столбец для анализа.
+5. Система обработает данные с помощью локальной нейронной сети и сгенерирует облако слов.
+6. Получите визуализацию и опцию скачать облако в виде изображения.
