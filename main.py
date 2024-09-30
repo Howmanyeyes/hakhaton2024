@@ -128,7 +128,7 @@ def get_answers(request: dict):
         else:
             return 0 # return error - polzovatel dolbaeb
     else:
-        answers = df[inputs['choose column'].split(': ')[1]]
+        answers = df[': '.join(inputs['choose column'].split(': ')[1:])]
 
     if inputs['filter profanity']:
         answers = filter_profanity(answers)
