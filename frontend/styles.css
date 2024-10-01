@@ -36,14 +36,14 @@ body {
 /* Buttons */
 button {
     padding: 1em 2em;
-    font-size: 4vmin;
+    font-size: 3vmin;
     font-family: 'MTS Wide', sans-serif;
     cursor: pointer;
     background-color: #FF0032;
     color: #ffffff;
     border: none;
     border-radius: 10px;
-    margin: 20px 0;
+    margin: 2vmin 1vmin;
     transition: background-color 0.3s, color 0.3s;
     box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
 }
@@ -277,4 +277,26 @@ button:hover {
     font-size: 1.4em; /* Larger text for better readability */
     color: #000;
 
+}
+
+.btndiv{
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+}
+
+h2{
+    margin-bottom: 0;
+    margin-top: 2%;
+}
+
+#pie_holder, #cloud_holder{
+    height: 80%;
+    display: flex;
+    flex-direction: column;  /* Stacks elements vertically */
+    justify-content: center; /* Center vertically */
+    align-items: center;  
+}
+#cloud_holder {
+    height: 70%;
 }

@@ -2,8 +2,6 @@ import re
 import json
 import aiohttp
 
-
-
 class OpenAI():
 
     async def chat_completions_create(**payload):
@@ -39,7 +37,7 @@ class Synonims_chatgpt:
         self.client  = OpenAI(api_key=api_key, \
                                 base_url=base_url)
         self.init_prompt = \
- """You will receive several messages containing survey answers, each as a list of words or phrases. After receiving "end of data," group all similar answers by meaning and provide a summary of the groups. The summary should include the group name and the percentage of each group, with a maximum of 50 groups returned.
+ """You will receive several messages containing survey answers, each as a list of words or phrases. After receiving "end of data," group all similar answers by meaning and provide a summary of the groups. The summary should include the group name and the percentage of each group, with a maximum of 24 groups returned.
 
 Format the result in JSON without any additional commentary or explanation.
 

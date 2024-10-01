@@ -37,7 +37,7 @@
             leftPanel.appendChild(leftImage);
 
             // Set the center panel with the pie chart image
-            const centerPanel = window.document.getElementById('center-panel');
+            const centerPanel = window.document.getElementById('pie_holder');
             const pieImage = document.createElement('img');
             pieImage.src = pie_url;
             pieImage.alt = 'Pie chart image';
@@ -92,7 +92,7 @@
 
     <div id="center-panel" class="panel">
         <h2 style="color: black; text-align: center;">PieChart</h2>
-
+        <div id = "pie_holder"></div>
         <!-- JSON content will be placed here -->
     </div>
 

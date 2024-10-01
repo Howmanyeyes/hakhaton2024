@@ -11,6 +11,7 @@ try:
     from wordcloud import WordCloud
     from pipelines import pipeline_text
     from fastapi.staticfiles import StaticFiles
+    import threading
 
 except ModuleNotFoundError:
     import os, sys
@@ -145,7 +146,12 @@ async def return_image(request: dict):
     answers = await a_get_answers(request=request)
     rating = await pipeline_text(answers) 
     colour = request['inputs']['Цветовая гамма Облака']
-    create_wordcloud(rating, colour, picture_id)
+    thread = threading.Thread(target=create_wordcloud, args=(rating, colour, picture_id), daemon=True)
+    thread.start()
+    while thread.is_alive():
+        await asyncio.sleep(0.1)
+        thread.join()
+    #create_wordcloud(rating, colour, picture_id)
     with open(f'generated/{picture_id}.json', 
               'w', encoding='utf-8') as json_file:
         json.dump(rating, json_file, ensure_ascii=False, indent=4)
@@ -153,34 +159,58 @@ async def return_image(request: dict):
         "image_url": f"/generated/{picture_id}.png"
     }
 
-def generate_piechart(json_filename):
+def generate_piechart(id):
+    output_dir = "generated/"
+    os.makedirs(output_dir, exist_ok=True)
+    output_path = os.path.join(output_dir, f'pie_{id}.png')
+    if os.path.exists(output_path):
+        return
     # Load the JSON file
-    with open(f"generated/{json_filename}.json", 'r', encoding='utf-8') as json_file:
+    with open(f"generated/{id}.json", 'r', encoding='utf-8') as json_file:
         data = json.load(json_file)
 
     # Extracting the names and volumes
-    names = list(data.keys())
-    volumes = list(data.values())
+    items  = sorted(list(data.items()), key = lambda x: x[1], reverse=True)[:10]
+    other = 100 - sum(i[1] for i in items)
+    if other > 0:
+        items.append(('Другое', other))
+    names, volumes = zip(*items)
 
+    COLORS = (
+    '#FF9999',  # Light Red
+    '#66B2FF',  # Light Blue
+    '#99FF99',  # Light Green
+    '#FFCC99',  # Light Orange
+    '#FFD700',  # Gold
+    '#FFB6C1',  # Light Pink
+    '#8A2BE2',  # Blue Violet
+    '#32CD32',  # Lime Green
+    '#FF4500',  # Orange Red
+    '#DA70D6',  # Orchid
+    '#20B2AA'   # Light Sea Green
+    )
     # Ensure the output directory exists
-    output_dir = "generated/"
-    os.makedirs(output_dir, exist_ok=True)
+
 
     # Create a pie chart
     plt.figure(figsize=(6, 6))  # Set the figure size for the pie chart
-    plt.pie(volumes, labels=names, autopct='%1.1f%%', startangle=90)
+    plt.pie(volumes, labels=names, autopct='%1.1f%%', colors = COLORS)
     plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
 
     # Define the file path where the chart will be saved
-    output_path = os.path.join(output_dir, f'pie_{json_filename}.png')
 
     # Save the chart as an image
-    plt.savefig(output_path)
+    plt.savefig(output_path, bbox_inches='tight')
 
 @app.post('/rest/details/')
 async def return_details(result_id: str):
     name = result_id
-    generate_piechart(name)
+    thread = threading.Thread(target=generate_piechart, args=(name, ), daemon=True)
+    thread.start()
+    while thread.is_alive():
+        await asyncio.sleep(0.1)
+        thread.join()
+    #generate_piechart(name)
     return {
         "pie_url": f"/generated/pie_{name}.png",
         "json_url": f"/generated/{name}.json",
