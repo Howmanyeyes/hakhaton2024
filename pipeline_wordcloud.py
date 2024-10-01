@@ -1,10 +1,11 @@
 
 from synonyms import Synonyms
+from chatapi import Synonims_chatgpt
 from typing import Iterable
 import asyncio
+from decouple import config
 
-MAX_BATCH = 300
-MAX_OUT = 60
+MAX_BATCH = 600
 
 def response_formatter(response: str):
     strs = response.split('\n')
@@ -21,29 +22,43 @@ def response_formatter(response: str):
                 return []
     return ans 
 
-model = Synonyms('https://hack.agicotech.ru/api', MAX_OUT)
-asyncio.run(model.check_model())
+#model = Synonyms('https://hack.agicotech.ru/api', MAX_OUT)
+#asyncio.run(model.check_model()) 
+# LLama работает прямо скажем так себе\
 
-async def tree_iteration(data : list):
+model = Synonims_chatgpt(config('TOKEN'), config('BASE_URL'))
+
+async def divided_process(data : list):
+    """Обработка результатов по кускам"""
     batch_amount = (len(data) + MAX_BATCH - 1) // MAX_BATCH
     batch_size = (len(data) + batch_amount - 1) // batch_amount
-    data_array = []
+    result = {}
     for i in range(0, len(data), batch_size):
         print(f'PROCESSED BATCH {i}')
         batch = data[i:i+batch_size]
-        batch_res = await pipeline_array_words(batch)
-        data_array += batch_res
-    return data_array
+        batch_res = {}
+        for _ in range(3):
+            batch_res = await pipeline_array_words(batch)
+            if len(batch_res):
+                break
+        for k, v in batch_res.items():
+            if k in result:
+                result[k] += v/batch_amount
+            else:
+                result[k] = v/batch_amount
+        return result
+
+
 
 async def pipeline_array_words(data: Iterable[str] | str):
     input = '\n'.join(data)
     for i in range(10):
         data = await model.process(input)
-        data = response_formatter(data)
+        #data = response_formatter(data)
         if len(data):
             print(f'OK RESPONSE IN {i} REQUEST')
             return data
-    return []
+    return {}
 
 def remove_multiple_spaces(s: str):
     s = ' '.join(subs for subs in s.split(' ') if len(subs))
@@ -55,10 +70,5 @@ def remove_empty_lines_and_spaces(text: Iterable[str]):
 async def pipeline_text(data: str | Iterable[str]):
     if type(data) == str: data = data.split('\n')
     data = list(remove_empty_lines_and_spaces(data))
-    data = await tree_iteration(data)
-    l = len(data)
-    while l > MAX_OUT:
-        print(f'HIT MAX_OUT : {l}/{MAX_OUT}')
-        data = await tree_iteration(data)
-        l = len(data)
-    return {s : i for i, s in enumerate(data[::-1], 1)}
+    data = await divided_process(data)
+    return data
