@@ -10,6 +10,27 @@ const detailsButton = document.getElementById('details-button');
 let targetId = '';
 let inputsData = {};
 
+async function fetchWithRetry(url, options = {}, retries = 3, delay = 1000) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            const response = await fetch(url, options);
+            if (response.status === 200) {
+                return response; // If status is 200, return the response.
+            } else {
+                console.log(`Attempt ${i + 1} failed with status: ${response.status}`);
+            }
+        } catch (error) {
+            console.log(`Attempt ${i + 1} failed with error: ${error.message}`);
+        }
+
+        if (i < retries - 1) {
+            // If it's not the last attempt, wait for the specified delay.
+            await new Promise(resolve => setTimeout(resolve, delay));
+        }
+    }
+    throw new Error(`Failed to fetch after ${retries} retries.`);
+}
+
 // Upload Button Click
 uploadButton.addEventListener('click', () => {
     fileInput.click();
@@ -31,7 +52,7 @@ function uploadFile(file) {
     const formData = new FormData();
     formData.append('file', file);
 
-    fetch('/rest/upload', {
+    fetchWithRetry('/rest/upload', {
         method: 'POST',
         body: formData
     })
@@ -153,7 +174,7 @@ function processInputs(inputsValues) {
         target_id: targetId
     };
 
-    fetch('/rest/process/', {
+    fetchWithRetry('/rest/process/', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -162,6 +183,11 @@ function processInputs(inputsValues) {
     })
     .then(response => response.json())
     .then(data => {
+        if (data.error){
+            alert(data.error);
+            location.reload();
+            return;
+        }
         loading.style.display = 'none';
         image_url_const = data.image_url;
         displayResult(data.image_url);

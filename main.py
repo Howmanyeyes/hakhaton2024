@@ -144,6 +144,7 @@ async def return_image(request: dict):
     """Returns image url of wordcloud in form of dict"""
     picture_id = request['target_id'][:-4]
     answers = await a_get_answers(request=request)
+    if type(answers) == int or  len(answers) == 0: return {'error': "Empty data. Maybe not sellected any column"}
     rating = await pipeline_text(answers) 
     colour = request['inputs']['Цветовая гамма Облака']
     thread = threading.Thread(target=create_wordcloud, args=(rating, colour, picture_id), daemon=True)
