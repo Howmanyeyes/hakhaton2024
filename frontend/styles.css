@@ -225,3 +225,56 @@ button:hover {
     margin-top: 0;
 }
 
+/* Styles for panels */
+.panel {
+    position: relative;
+    background-color: #ffffff;
+    border-radius: 30px;
+    padding: 20px;
+    box-sizing: border-box;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
+    overflow: auto;
+    margin: 10px;
+}
+
+/* Left panel styling */
+#left-panel {
+    position: absolute;
+    top: 10%;
+    left: 5%;
+    width: 25%;
+    height: 60%;
+}
+#center-panel {
+    position: absolute;
+    top: 10%;
+    right: 35%;
+    width: 30%;
+    height: 60%;
+}
+/* Right panel styling */
+#right-panel {
+    position: absolute;
+    top: 10%;
+    right: 5%;
+    width: 25%;
+    height: 60%;
+    white-space: pre-wrap; /* To handle JSON formatting */
+    color: #000;
+}
+
+/* Bottom panel styling */
+#bottom-panel {
+    position: absolute;
+    bottom: 5%;
+    left: 5%;
+    right: 5%;
+    height: 120px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    font-size: 1.4em; /* Larger text for better readability */
+    color: #000;
+
+}

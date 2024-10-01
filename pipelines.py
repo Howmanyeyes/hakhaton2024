@@ -7,21 +7,6 @@ from decouple import config
 
 MAX_BATCH = 600
 
-def response_formatter(response: str):
-    strs = response.split('\n')
-    ans = []
-    longcounter = 0
-    for str in strs:
-        str = ''.join(s for s in str.strip() if s.isalpha() or s == ' ')
-        nwords = len(str.split(' '))
-        if 0 < nwords <= 10 and not ':' in str: ans.append(str)
-        else: longcounter += 1
-
-        if longcounter >= 3:
-                print('HIT LONGCOUNTER')
-                return []
-    return ans 
-
 #model = Synonyms('https://hack.agicotech.ru/api', MAX_OUT)
 #asyncio.run(model.check_model()) 
 # LLama работает прямо скажем так себе\
@@ -30,17 +15,14 @@ model = Synonims_chatgpt(config('TOKEN'), config('BASE_URL'))
 
 async def divided_process(data : list):
     """Обработка результатов по кускам"""
-    batch_amount = (len(data) + MAX_BATCH - 1) // MAX_BATCH
-    batch_size = (len(data) + batch_amount - 1) // batch_amount
+    batch_amount = (len(data) + MAX_BATCH - 1) // MAX_BATCH # Количество запросов
+    batch_size = (len(data) + batch_amount - 1) // batch_amount # Размер запроса
     result = {}
     for i in range(0, len(data), batch_size):
-        print(f'PROCESSED BATCH {i}')
         batch = data[i:i+batch_size]
         batch_res = {}
-        for _ in range(3):
-            batch_res = await pipeline_array_words(batch)
-            if len(batch_res):
-                break
+        batch_res = await pipeline_array_words(batch)
+
         for k, v in batch_res.items():
             if k in result:
                 result[k] += v/batch_amount
@@ -50,13 +32,11 @@ async def divided_process(data : list):
 
 
 
-async def pipeline_array_words(data: Iterable[str] | str):
+async def pipeline_array_words(data: Iterable[str] | str): 
     input = '\n'.join(data)
-    for i in range(10):
+    for i in range(3):# Нейросеть иногда выдает некрасивые данные
         data = await model.process(input)
-        #data = response_formatter(data)
         if len(data):
-            print(f'OK RESPONSE IN {i} REQUEST')
             return data
     return {}
 

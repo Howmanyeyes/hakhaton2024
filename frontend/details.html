@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Details Page</title>
+    <link rel="stylesheet" href="styles.css">
+    <script>
+        const queryString = window.location.search;
+        // console.log(queryString);
+        const urlParams = new URLSearchParams(queryString);
+        const result_id = urlParams.get('result')
+        // console.log(result_id)
+    
+    
+    window.onload = function() {
+        fetch('/rest/details/?result_id='+result_id, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        const { pie_url, json_url, image_url} = data;
+
+        // Open the "details.html" page in a new tab
+
+        // Wait for the new window to fully load before manipulating its content
+
+            // Set the left panel with the image from image_url
+            const leftPanel = document.getElementById('left-panel');
+            const leftImage = document.createElement('img');
+            leftImage.src = image_url;
+            leftImage.alt = 'Image from response';
+            leftImage.style.width = '100%';  // Fit the image within the panel
+            leftPanel.appendChild(leftImage);
+
+            // Set the center panel with the pie chart image
+            const centerPanel = window.document.getElementById('center-panel');
+            const pieImage = document.createElement('img');
+            pieImage.src = pie_url;
+            pieImage.alt = 'Pie chart image';
+            pieImage.style.width = '100%';  // Fit the pie chart within the panel
+            centerPanel.appendChild(pieImage);
+
+            // Fetch the JSON content from the json_url
+            fetch(json_url)
+                .then(response => response.text())
+                .then(jsonData => {
+                    // Populate the right panel with the full JSON content
+                    const rightPanel = document.getElementById('json-content-span');
+                    rightPanel.textContent = jsonData
+                    // Populate the bottom panel with the first line of JSON content
+                    const bottomPanel = document.getElementById('bottom-panel');
+                    const firstKey = Object.values(jsonData)[1];
+                    const jsonobj = JSON.parse(jsonData)
+                    const maxkey = Object.keys(jsonobj).reduce((a, b) => jsonobj[a] > jsonobj[b] ? a : b)
+                    
+                    bottomPanel.textContent =  `Popular: ${maxkey} (${jsonobj[maxkey]}%)`;
+                })
+                .catch(error => {
+                    console.error('Error fetching JSON data:', error);
+                });
+        
+    })
+    .catch(error => {
+        console.error('Error sending POST request:', error);
+    });
+};
+
+// Download Button Click
+
+
+    </script>
+</head>
+<body>
+
+    <!-- Video Background -->
+    <div id="video-container">
+        <video autoplay muted loop id="video-bg">
+            <source src="background.webm" type="video/webm">
+            Your browser does not support HTML5 video.
+        </video>
+    </div>
+
+    <!-- Left Panel -->
+    <div id="left-panel" class="panel">
+        <h2 style="color: black; text-align: center;">Wordcloud</h2>
+        <!-- Image will be placed here -->
+    </div>
+
+    <div id="center-panel" class="panel">
+        <h2 style="color: black; text-align: center;">PieChart</h2>
+
+        <!-- JSON content will be placed here -->
+    </div>
+
+    <!-- Right Panel -->
+    <div id="right-panel" class="panel">
+        <h2 style="color: black; text-align: center;">JSON Result</h2>
+        <code id="json-content-span"></code>
+
+        <!-- JSON content will be placed here -->
+    </div>
+
+    <!-- Bottom Panel -->
+     <b>
+    <div id="bottom-panel" class="panel">
+        <!-- First line of JSON content will be placed here -->
+    </div></b>
+
+    <script src="script.js"></script>
+</body>
+</html>

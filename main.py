@@ -50,9 +50,9 @@ def get_upload(file):
             f.write(f_content.getvalue())
         return {
             "inputs": {
-                "choose color scheme of clowd": {"type": "dropdown", \
+                "Цветовая гамма Облака": {"type": "dropdown", \
                                                  "items": best_colormaps, "default": "red"},
-                "filter profanity": {"type": "checkbox", "default": True}
+                "Цензор": {"type": "checkbox", "default": True}
             },
             "target_id": f"{f_name}.txt",
         }
@@ -61,11 +61,11 @@ def get_upload(file):
     cols = [f'{ind_exel(int(num))}{x}' for num, x in enumerate(["My info is in row"] + list(df.columns), 0)]        
     return {
         "inputs": {
-            "choose color scheme of clowd": {"type": "dropdown", \
+            "Цветовая гамма Облака": {"type": "dropdown", \
                                              "items": best_colormaps, "default": "red"},
-            "choose column": {"type": "dropdown", "items": cols},
-            "type number of row (ONLY if you use rows)": {"type": "text", "default": ""},
-            "filter profanity": {"type": "checkbox", "default": True}
+            "Выберите столбец": {"type": "dropdown", "items": cols},
+            "Выберите строку (ТОЛЬКО отдельно от столбца)": {"type": "text", "default": ""},
+            "Цензор": {"type": "checkbox", "default": True}
         },
         "target_id": f"{f_name}.pkl"
     }
@@ -118,15 +118,15 @@ def get_answers(request: dict):
     inputs = request['inputs']
     df = pd.read_pickle(f"temp_tables/{f_name}")
    
-    if inputs['choose column'] == 'My info is in row':
-        if inputs['type number of row (ONLY if you use rows)'] != '':
-            answers = df.iloc[int(inputs['type number of row (ONLY if you use rows)'])]
+    if inputs['Выберите столбец'] == 'My info is in row':
+        if inputs['Выберите строку (ТОЛЬКО отдельно от столбца)'] != '':
+            answers = df.iloc[int(inputs['Выберите строку (ТОЛЬКО отдельно от столбца)'])]
         else:
             return 0 # return error - polzovatel ne vvodil chislo
     else:
-        answers = df[': '.join(inputs['choose column'].split(': ')[1:])]
+        answers = df[': '.join(inputs['Выберите столбец'].split(': ')[1:])]
 
-    if inputs['filter profanity']:
+    if inputs['Цензор']:
         answers = filter_profanity(answers)
     else:
         answers = [x for x in answers if type(x) == str]
@@ -141,16 +141,56 @@ async def a_get_answers(request: dict):
 @app.post('/rest/process/')
 async def return_image(request: dict):
     """Returns image url of wordcloud in form of dict"""
+    picture_id = request['target_id'][:-4]
     answers = await a_get_answers(request=request)
     rating = await pipeline_text(answers) 
-    colour = request['inputs']['choose color scheme of clowd']
-    create_wordcloud(rating, colour, request['target_id'])
+    colour = request['inputs']['Цветовая гамма Облака']
+    create_wordcloud(rating, colour, picture_id)
+    with open(f'generated/{picture_id}.json', 
+              'w', encoding='utf-8') as json_file:
+        json.dump(rating, json_file, ensure_ascii=False, indent=4)
     return {
-        "image_url": f"/generated/{request['target_id']}.png"
+        "image_url": f"/generated/{picture_id}.png"
     }
-    
+
+def generate_piechart(json_filename):
+    # Load the JSON file
+    with open(f"generated/{json_filename}.json", 'r', encoding='utf-8') as json_file:
+        data = json.load(json_file)
+
+    # Extracting the names and volumes
+    names = list(data.keys())
+    volumes = list(data.values())
+
+    # Ensure the output directory exists
+    output_dir = "generated/"
+    os.makedirs(output_dir, exist_ok=True)
+
+    # Create a pie chart
+    plt.figure(figsize=(6, 6))  # Set the figure size for the pie chart
+    plt.pie(volumes, labels=names, autopct='%1.1f%%', startangle=90)
+    plt.axis('equal')  # Equal aspect ratio ensures that pie is drawn as a circle.
+
+    # Define the file path where the chart will be saved
+    output_path = os.path.join(output_dir, f'pie_{json_filename}.png')
+
+    # Save the chart as an image
+    plt.savefig(output_path)
+
+@app.post('/rest/details/')
+async def return_details(result_id: str):
+    name = result_id
+    generate_piechart(name)
+    return {
+        "pie_url": f"/generated/pie_{name}.png",
+        "json_url": f"/generated/{name}.json",
+        "image_url": f"/generated/{name}.png",
+
+    }
+
+
 app.mount("/", StaticFiles(directory="frontend",html = True), name="static")
 
-if __name__ =='__main__':
+if __name__ == '__main__':
     import uvicorn
     uvicorn.run(app, port=8000)

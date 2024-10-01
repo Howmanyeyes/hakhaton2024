@@ -57,6 +57,7 @@ function uploadFile(file) {
     });
 }
 
+
 // Generate Inputs Function
 function generateInputs(inputs) {
     dynamicInputs.innerHTML = '';
@@ -140,7 +141,7 @@ processButton.addEventListener('click', () => {
     }
     processInputs(inputsValues);
 });
-
+let image_url_const;
 // Process Inputs Function
 function processInputs(inputsValues) {
     dynamicInputs.style.display = 'none';
@@ -162,6 +163,7 @@ function processInputs(inputsValues) {
     .then(response => response.json())
     .then(data => {
         loading.style.display = 'none';
+        image_url_const = data.image_url;
         displayResult(data.image_url);
     })
     .catch(error => {
@@ -173,12 +175,18 @@ function processInputs(inputsValues) {
 // Display Result Function
 function displayResult(imageUrl) {
     resultImage.src = imageUrl;
+    
     resultImage.style.display = 'block';
     downloadButton.style.display = 'block';
     detailsButton.style.display = 'block';
 }
 
-// Download Button Click
+detailsButton.addEventListener('click', function() {
+    // Send POST request before opening the new page
+    const id = image_url_const.match(/\/.*\/([a-z0-9]+)\..*/)[1]
+    const newWindow = window.open('details.html?result='+id, '_blank');
+});
+
 downloadButton.addEventListener('click', () => {
     const link = document.createElement('a');
     link.href = resultImage.src;
@@ -187,7 +195,6 @@ downloadButton.addEventListener('click', () => {
     link.click();
     document.body.removeChild(link);
 });
-
 
 
 const helpButton = document.getElementById('help-button');
