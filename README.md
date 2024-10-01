@@ -1,4 +1,4 @@
-# <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Logo_%D0%9C%D0%A2%D0%A1_%282023%29.svg/1200px-Logo_%D0%9C%D0%A2%D0%A1_%282023%29.svg.png" alt="Alt Text" width="40" height="40"> МТС Линк. Использование ИИ в продукте, команда Ш.У.Е. <a href="https://ibb.co/rvdD77r"><img src="https://i.ibb.co/FnHRxxT/Vix2-9-HZn-Q.jpg" alt="Vix2-9-HZn-Q" width="40" height="40" border="0" /></a>
+# <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d7/Logo_%D0%9C%D0%A2%D0%A1_%282023%29.svg/1200px-Logo_%D0%9C%D0%A2%D0%A1_%282023%29.svg.png" alt="Alt Text" width="40" height="40"> МТС Линк. Использование ИИ в продукте, команда Ш.У.Е. <img src="https://i.ibb.co/FnHRxxT/Vix2-9-HZn-Q.jpg" alt="Vix2-9-HZn-Q" width="40" height="40" border="0" />
 **Использование локальной нейронной сети для анализа ответов опроса и генерация облаков слов, основаном на анализе нейронной сети.**
 ## Содержание
 1. [Описание](#описание)
@@ -34,6 +34,8 @@
 5. Система обработает данные с помощью локальной нейронной сети и сгенерирует облако слов.
 6. Получите визуализацию и опцию скачать облако в виде изображения.
 7. (Опционально) Посмотрите детализацию анализа ваших данных по кнопке `Details`.
+   
+<img src="https://i.ibb.co/56MPPDM/2.png" alt="2" border="0">
 
 ## Авторы
 
