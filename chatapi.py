@@ -16,13 +16,6 @@ class OpenAI():
 
     def _send_to_openai(self, endpoint_url: str,):
         async def send_to_openai(**payload: dict) -> aiohttp.ClientResponse:
-            #payload['api_key'] = self.api_key
-            """
-            Send a request to openai.
-            :param api_key: your api key
-            :param timeout: timeout in seconds
-            :param payload: the request body, as detailed here: https://beta.openai.com/docs/api-reference
-            """
             async with aiohttp.ClientSession() as client:
                 return await client.post(
                     url=endpoint_url,

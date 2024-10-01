@@ -9,7 +9,7 @@ try:
     import string
     import matplotlib.pyplot as plt
     from wordcloud import WordCloud
-    from pipeline_wordcloud import pipeline_text
+    from pipelines import pipeline_text
     from fastapi.staticfiles import StaticFiles
 
 except ModuleNotFoundError:
