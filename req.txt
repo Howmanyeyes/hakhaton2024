@@ -7,5 +7,5 @@ httpx
 wordcloud
 matplotlib
 aiohttp
-decouple
-openai-async
+python-decouple
+

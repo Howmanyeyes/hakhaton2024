@@ -5,6 +5,8 @@ const dynamicInputs = document.getElementById('dynamic-inputs');
 const processButton = document.getElementById('process-button');
 const resultImage = document.getElementById('result-image');
 const downloadButton = document.getElementById('download-button');
+const detailsButton = document.getElementById('details-button');
+
 let targetId = '';
 let inputsData = {};
 
@@ -173,6 +175,7 @@ function displayResult(imageUrl) {
     resultImage.src = imageUrl;
     resultImage.style.display = 'block';
     downloadButton.style.display = 'block';
+    detailsButton.style.display = 'block';
 }
 
 // Download Button Click
