@@ -233,7 +233,7 @@ button:hover {
     padding: 20px;
     box-sizing: border-box;
     box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
-    overflow: auto;
+    overflow: hidden;
     margin: 10px;
 }
 
@@ -261,6 +261,7 @@ button:hover {
     height: 60%;
     white-space: pre-wrap; /* To handle JSON formatting */
     color: #000;
+    overflow: auto;
 }
 
 /* Bottom panel styling */

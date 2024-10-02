@@ -79,7 +79,7 @@ async def return_upload(file: UploadFile = File(...)):
     """Returns a dictionary with the uploaded file's name and possible inputs."""
     return await a_get_upload(file)
 
-with open('bad_words.json', 'r') as f:
+with open('asserts/bad_words.json', 'r') as f:
     BAD_WORDS = set(json.load(f)) # set кратно ускоряет проверку на вхождение относительно list
 
 def filter_profanity(answers):
@@ -99,7 +99,7 @@ def create_wordcloud(rating, colour, name):
         colour = 'viridis'
         MTC = True
     wordcloud = WordCloud(width=1000, height=1000, background_color="white", \
-                          colormap=colour, random_state=42, font_path='MTSWide-Bold.ttf')\
+                          colormap=colour, random_state=42, font_path='asserts/MTSWide-Bold.ttf')\
                             .generate_from_frequencies(rating)
     if MTC:
         wordcloud.recolor(color_func=red_color_func)
